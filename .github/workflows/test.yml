@@ -1,0 +1,81 @@
+name: test
+on:
+  pull_request:
+    paths:
+    - '**.rs'
+    - '**/Cargo.*'
+    - '.github/workflows/test.yml'
+    - 'codecov.yml'
+  push:
+    branches:
+      - "master"
+      - "release/*"
+      - "staging"
+      - "trying"
+    paths:
+      - '**.rs'
+      - '**/Cargo.*'
+      - '.github/workflows/test.yml'
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: 1
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Test Rust
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ["ubuntu-latest", "windows-latest", "macOS-latest", "self-hosted"]
+        include:
+          - CARGO_INCREMENTAL: 1
+            CARGO_TARGET_DIR: "target"
+            KAGARI_LIB_ROOT: /planglib
+            PL_ROOT: /target/debug/
+            GC_LOG: trace
+          - os: "windows-latest"
+            RUSTFLAGS: "-Ctarget-feature=+crt-static"
+            CARGO_INCREMENTAL: 0
+            CARGO_TARGET_DIR: "C:\\cargo-target-dir"
+            KAGARI_LIB_ROOT: \planglib
+            PL_ROOT: \target\debug
+    env:
+      RUSTFLAGS: ${{ matrix.RUSTFLAGS }}
+      CARGO_INCREMENTAL: ${{ matrix.CARGO_INCREMENTAL }}
+      # Disable generating debug info, we don't need it here anyway and its only using disk space
+      CARGO_PROFILE_DEV_DEBUG: 0
+      CARGO_TARGET_DIR: ${{ matrix.CARGO_TARGET_DIR }}
+      KAGARI_LIB_ROOT: ${{ github.workspace }}${{ matrix.KAGARI_LIB_ROOT }}
+      PL_ROOT: ${{ github.workspace }}${{ matrix.PL_ROOT }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Install toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          override: true
+          components: rustfmt, llvm-tools-preview
+
+
+      - name: Install latest llvm-cov release
+        uses: taiki-e/install-action@cargo-llvm-cov
+
+      - name: Install latest nextest release
+        uses: taiki-e/install-action@nextest
+
+
+
+      - name: Test with latest nextest release
+        uses: actions-rs/cargo@v1
+        with:
+          command: llvm-cov
+          args: nextest --workspace --all-features --lcov --output-path lcov.info --profile ci -vv
