@@ -6,6 +6,7 @@ on:
     - '**/Cargo.*'
     - '.github/workflows/test.yml'
     - 'codecov.yml'
+    - 'rust-toolchain'
   push:
     branches:
       - "master"
@@ -16,6 +17,7 @@ on:
       - '**.rs'
       - '**/Cargo.*'
       - '.github/workflows/test.yml'
+      - 'rust-toolchain'
 
 env:
   CARGO_TERM_COLOR: always
