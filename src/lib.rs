@@ -8,9 +8,9 @@ mod aarch64;
 pub use aarch64::*;
 
 
-#[cfg(target_arch = "x84_64")]
+#[cfg(not(target_arch = "aarch64"))]
 mod x86_64;
-#[cfg(target_arch = "x84_64")]
+#[cfg(not(target_arch = "aarch64"))]
 pub use x86_64::*;
 
 #[cfg(test)]
