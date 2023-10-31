@@ -9,8 +9,9 @@ pub fn unwind() -> Vec<Frame> {
     let mut frames = Vec::new();
     loop {
         let sp = fp + 0x10;
+        let prev_fp = fp;
         (fp, lr) = load_prev_frame(fp);
-        if fp == 0 {
+        if fp == 0 || prev_fp == fp {
             break;
         }
         frames.push(Frame::new(sp, lr, fp));

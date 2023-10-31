@@ -24,7 +24,8 @@ mod tests {
             frames2.push(Frame::new(frame.sp() as usize, frame.ip() as usize, 0));
             true
         });
-
+        eprintln!("unwind\n{:#?}", frames1);
+        eprintln!("backtrace\n{:#?}", frames2);
         assert_eq!(frames1.len(), frames2.len() - 2);
         for i in 0..frames1.len() {
             assert_eq!(frames1[i].sp(), frames2[i + 2].sp());
