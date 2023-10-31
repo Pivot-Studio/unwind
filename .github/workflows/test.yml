@@ -34,15 +34,16 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: ["ubuntu-latest", "windows-latest", "macOS-latest", "self-hosted"]
+        os: ["ubuntu-latest", "windows-latest", "macOS-latest"]
         include:
           - CARGO_INCREMENTAL: 1
             CARGO_TARGET_DIR: "target"
             KAGARI_LIB_ROOT: /planglib
             PL_ROOT: /target/debug/
             GC_LOG: trace
+            RUSTFLAGS: "-Ctarget-feature=+crt-static -C force-frame-pointers=y"
           - os: "windows-latest"
-            RUSTFLAGS: "-Ctarget-feature=+crt-static"
+            RUSTFLAGS: "-Ctarget-feature=+crt-static -C force-frame-pointers=y"
             CARGO_INCREMENTAL: 0
             CARGO_TARGET_DIR: "C:\\cargo-target-dir"
             KAGARI_LIB_ROOT: \planglib
